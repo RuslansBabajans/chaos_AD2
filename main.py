@@ -73,81 +73,81 @@ cCorrupted_B = c_int()
 fLost_B = 0
 fCorrupted_B = 0
 cSamples_B = 0
-for a in range(len(SNR)):
+
 #####################################################################################
     # Import noise signal .csv files and convert them to c_double
-    with open('RC2_synchro_noise_samples.csv', newline='') as File:
-        txtlist = [j for sub in csv.reader(File) for j in sub]
-        fa = list(map(float, txtlist))
-        genSamples_synchro_noise = (c_double * len(fa))(*fa)
+with open('RC1_synchro_noise_samples.csv', newline='') as File:
+    txtlist = [j for sub in csv.reader(File) for j in sub]
+    fa = list(map(float, txtlist))
+    genSamples_synchro_noise = (c_double * len(fa))(*fa)
 
-    with open('RC2_info_noise_samples.csv', newline='') as File:
-        txtlist = [j for sub in csv.reader(File) for j in sub]
-        fa = list(map(float, txtlist))
-        genSamples_info_noise = (c_double * len(fa))(*fa)
+with open('RC1_info_noise_samples.csv', newline='') as File:
+    txtlist = [j for sub in csv.reader(File) for j in sub]
+    fa = list(map(float, txtlist))
+    genSamples_info_noise = (c_double * len(fa))(*fa)
 #####################################################################################
 # Load dwf library (contain functions to interact with AD2)
-    if sys.platform.startswith("win"):
-        dwf = cdll.dwf
-    elif sys.platform.startswith("darwin"):
-        dwf = cdll.LoadLibrary("/Library/Frameworks/dwf.framework/dwf")
-    else:
-        dwf = cdll.LoadLibrary("libdwf.so")
+if sys.platform.startswith("win"):
+    dwf = cdll.dwf
+elif sys.platform.startswith("darwin"):
+    dwf = cdll.LoadLibrary("/Library/Frameworks/dwf.framework/dwf")
+else:
+    dwf = cdll.LoadLibrary("libdwf.so")
 
-    version = create_string_buffer(16)
-    dwf.FDwfGetVersion(version)
-    print("DWF Version: " + str(version.value))
-    dwf.FDwfParamSet(DwfParamOnClose, c_int(1))  # 0 = run, 1 = stop, 2 = shutdown
+version = create_string_buffer(16)
+dwf.FDwfGetVersion(version)
+print("DWF Version: " + str(version.value))
+dwf.FDwfParamSet(DwfParamOnClose, c_int(1))  # 0 = run, 1 = stop, 2 = shutdown
 #####################################################################################
 # Enumerate and print device information
-    dwf.FDwfEnum(c_int(3), byref(cDevice))  # Enumerate AD2 devices
-    print("Number of Devices: " + str(cDevice.value))
+dwf.FDwfEnum(c_int(3), byref(cDevice))  # Enumerate AD2 devices
+print("Number of Devices: " + str(cDevice.value))
 
-    for iDev in range(0, cDevice.value):
-        dwf.FDwfEnumDeviceName(c_int(iDev), devicename)
-        dwf.FDwfEnumSN(c_int(iDev), serialnum)
-        print("------------------------------")
-        print("Device " + str(iDev) + " : ")
-        print("\tName:\'" + str(devicename.value) + "' " + str(serialnum.value))
+for iDev in range(0, cDevice.value):
+    dwf.FDwfEnumDeviceName(c_int(iDev), devicename)
+    dwf.FDwfEnumSN(c_int(iDev), serialnum)
     print("------------------------------")
+    print("Device " + str(iDev) + " : ")
+    print("\tName:\'" + str(devicename.value) + "' " + str(serialnum.value))
+print("------------------------------")
 #####################################################################################
 # Distinguish which device is AD2_A and AD2_B. Get handlers for both devices.
-    for iDev in range(0, cDevice.value):
-        dwf.FDwfEnumSN(c_int(iDev), serialnum)
-        deviceserialnum_string = str(serialnum.value)
+for iDev in range(0, cDevice.value):
+    dwf.FDwfEnumSN(c_int(iDev), serialnum)
+    deviceserialnum_string = str(serialnum.value)
 
-        if deviceserialnum_string == AD2_A:
-            device_id_A = iDev
-            print("------------------------------")
-            print("Opening AD2_A : " + deviceserialnum_string + ". Device ID: " + str(device_id_A))
-            dwf.FDwfDeviceOpen(c_int(device_id_A), byref(hdwf_A))
+    if deviceserialnum_string == AD2_A:
+        device_id_A = iDev
+        print("------------------------------")
+        print("Opening AD2_A : " + deviceserialnum_string + ". Device ID: " + str(device_id_A))
+        dwf.FDwfDeviceOpen(c_int(device_id_A), byref(hdwf_A))
 
-        if deviceserialnum_string == AD2_B:
-            device_id_B = iDev
-            print("------------------------------")
-            print("Opening AD2_B : " + deviceserialnum_string + ". Device ID: " + str(device_id_B))
-            dwf.FDwfDeviceOpen(c_int(device_id_B), byref(hdwf_B))
+    if deviceserialnum_string == AD2_B:
+        device_id_B = iDev
+        print("------------------------------")
+        print("Opening AD2_B : " + deviceserialnum_string + ". Device ID: " + str(device_id_B))
+        dwf.FDwfDeviceOpen(c_int(device_id_B), byref(hdwf_B))
+print("------------------------------")
+
+if hdwf_A.value == 0:
+    print("Failed to open device AD2-A")
+    szerr = create_string_buffer(512)
+    dwf.FDwfGetLastErrorMsg(szerr)
+    print(str(szerr.value))
+else:
+    print("Connected to AD2-A")
     print("------------------------------")
-
-    if hdwf_A.value == 0:
-        print("Failed to open device AD2-A")
-        szerr = create_string_buffer(512)
-        dwf.FDwfGetLastErrorMsg(szerr)
-        print(str(szerr.value))
-    else:
-        print("Connected to AD2-A")
-        print("------------------------------")
-    if hdwf_B.value == 0:
-        print("Failed to open device AD2-B")
-        szerr = create_string_buffer(512)
-        dwf.FDwfGetLastErrorMsg(szerr)
-        print(str(szerr.value))
-    else:
-        print("Connected to AD2-B")
-        print("------------------------------")
+if hdwf_B.value == 0:
+    print("Failed to open device AD2-B")
+    szerr = create_string_buffer(512)
+    dwf.FDwfGetLastErrorMsg(szerr)
+    print(str(szerr.value))
+else:
+    print("Connected to AD2-B")
+    print("------------------------------")
 #####################################################################################
 # Run the measurements part for every SNR level
-
+for a in range(len(SNR)):
     if hdwf_A.value != 0 and hdwf_B.value != 0:
         print("======================================")
         print("ITERRATION: " + str(a+1) + ", SNR= " + str(SNR[a]) + " dB")
@@ -297,12 +297,12 @@ for a in range(len(SNR)):
         print("------------------------------")
         time.sleep(5)  # Wait 5 sec.
 #####################################################################################
-        # Close devices
-        dwf.FDwfDeviceCloseAll()
-        time.sleep(2)  # Wait 2 sec.
-        print("======================================")
-        print("Measurements are done!")
-        print("======================================")
+# Close devices
+dwf.FDwfDeviceCloseAll()
+time.sleep(2)  # Wait 2 sec.
+print("======================================")
+print("Measurements are done!")
+print("======================================")
 #####################################################################################
 # Plot data
 plot1 = plt.figure(1)
