@@ -25,8 +25,8 @@ import csv
 
 # Parameters of the experiment
 SNR = [20, 15, 10, 5, 0]  # Signal-2-noise ratios (SNR) for the experiment in dB
-Amplitude_info_noise = [0.460, 0.825, 1.450, 2.620, 4.700]  # Amplitude of the noise signal for required SNR
-Amplitude_synchro_noise = [0.420, 0.760, 1.360, 2.460, 4.400]  # Amplitude of the noise signal for required SNR
+Amplitude_info_noise = [0.078, 0.150, 0.274, 0.493, 0.877]  # Amplitude of the noise signal for required SNR
+Amplitude_synchro_noise = [0.000, 0.016, 0.050, 0.087, 0.180]  # Amplitude of the noise signal for required SNR
 
 # Serial numbers of the used devices
 AD2_A = 'b\'SN:210321A962FA\''  # Change if device with different serial number is used
@@ -306,9 +306,9 @@ print("======================================")
 #####################################################################################
 # Plot data
 plot1 = plt.figure(1)
-plt.plot(np.fromiter(rgdSamples_chaos_info_signal_master, dtype=np.float))
+plt.plot(np.fromiter(rgdSamples_chaos_info_signal_master, dtype=float))
 plot2 = plt.figure(2)
-plt.plot(np.fromiter(rgdSamples_chaos_noise_signal_master, dtype=np.float))
+plt.plot(np.fromiter(rgdSamples_chaos_noise_signal_master, dtype=float))
 plot3 = plt.figure(3)
-plt.plot(np.fromiter(rgdSamples_chaos_info_signal_slave, dtype=np.float))
+plt.plot(np.fromiter(rgdSamples_chaos_info_signal_slave, dtype=float))
 plt.show()
