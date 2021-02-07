@@ -26,7 +26,8 @@ import csv
 # Parameters of the experiment
 SNR = [20, 15, 10, 5, 0]  # Signal-2-noise ratios (SNR) for the experiment in dB
 Amplitude_info_noise = [0.078, 0.150, 0.274, 0.493, 0.877]  # Amplitude of the noise signal for required SNR
-Amplitude_synchro_noise = [0.000, 0.016, 0.050, 0.087, 0.180]  # Amplitude of the noise signal for required SNR
+# Amplitude_synchro_noise = [0.000, 0.016, 0.050, 0.087, 0.180]  # Amplitude of the noise signal for required SNR
+Amplitude_synchro_noise = [0.180, 5.000, 5.000, 5.000, 5.000]  # Amplitude of the noise signal for required SNR
 
 # Serial numbers of the used devices
 AD2_A = 'b\'SN:210321A962FA\''  # Change if device with different serial number is used
