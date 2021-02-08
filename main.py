@@ -25,7 +25,8 @@ import csv
 
 # Parameters of the experiment
 SNR = [20, 15, 10, 5, 0]  # Signal-2-noise ratios (SNR) for the experiment in dB
-Amplitude_info_noise = [0.078, 0.150, 0.274, 0.493, 0.877]  # Amplitude of the noise signal for required SNR
+# Amplitude_info_noise = [0.078, 0.150, 0.274, 0.493, 0.877]  # Amplitude of the noise signal for required SNR
+Amplitude_info_noise = [1.5, 2.5, 3.5, 4.5, 5.5]  # Amplitude of the noise signal for required SNR
 # Amplitude_synchro_noise = [0.000, 0.016, 0.050, 0.087, 0.180]  # Amplitude of the noise signal for required SNR
 Amplitude_synchro_noise = [5.000, 4.000, 3.000, 2.000, 1.000]  # Amplitude of the noise signal for required SNR
 
@@ -52,8 +53,8 @@ hzFreq = 610.351563  # Parameter taken from the signal import window for the noi
 cSamples_gen = 2 * 16384  # Number of samples for AWG
 
 # Acquisition variables
-fAcq = 1e6  # Sample frequency for analog input channels in Hz
-tAcq = 0.05  # Signal acquisition time in sec.
+fAcq = 2e6  # Sample frequency for analog input channels in Hz
+tAcq = 0.03  # Signal acquisition time in sec.
 hzAcq = c_double(fAcq)
 nSamples = int(tAcq * fAcq)  # Number of samples for signal acquisition
 rgdSamples_chaos_info_signal_master = (c_double * nSamples)()  # Create a buffer array of c_doubles with size nSamples
@@ -64,17 +65,10 @@ rgdSamples_chaos_info_signal_slave = (c_double * nSamples)()  # Create a buffer 
 cAvailable_A = c_int()
 cLost_A = c_int()
 cCorrupted_A = c_int()
-fLost_A = 0
-fCorrupted_A = 0
-cSamples_A = 0
 
 cAvailable_B = c_int()
 cLost_B = c_int()
 cCorrupted_B = c_int()
-fLost_B = 0
-fCorrupted_B = 0
-cSamples_B = 0
-
 #####################################################################################
     # Import noise signal .csv files and convert them to c_double
 with open('RC1_synchro_noise_samples.csv', newline='') as File:
@@ -205,11 +199,20 @@ for a in range(len(SNR)):
         #####################################################################################
         # Acquire scope data
         # wait at least 2 seconds for the offset to stabilize
-        time.sleep(2)
+        # time.sleep(2)
         print("Starting oscilloscope acquisition...")
         print("------------------------------")
         dwf.FDwfAnalogInConfigure(hdwf_A, c_int(0), c_int(1))
         dwf.FDwfAnalogInConfigure(hdwf_B, c_int(0), c_int(1))
+
+        fLost_A = 0
+        fCorrupted_A = 0
+        cSamples_A = 0
+
+        fLost_B = 0
+        fCorrupted_B = 0
+        cSamples_B = 0
+        cSamples_B=0
 
         while cSamples_A < nSamples and cSamples_B < nSamples:
 
@@ -271,18 +274,17 @@ for a in range(len(SNR)):
         print("Saving data to .csv files...")
         print("------------------------------")
 
-        f = open("Chaos_info_signal_master_" + str(SNR[a]) + "_SNR.csv",
-                 "w")  # ("Chaos_noise_signal_master_0_SNR.csv", "w")
+        f = open("Chaos_info_signal_master_" + str(SNR[a]) + "_SNR.csv", "w")  # From AD2-A
         for v in rgdSamples_chaos_info_signal_master:
             f.write("%s\n" % v)
         f.close()
 
-        f = open("Chaos_noise_signal_master_" + str(SNR[a]) + "_SNR.csv", "w")
+        f = open("Chaos_noise_signal_master_" + str(SNR[a]) + "_SNR.csv", "w") # From AD2-B
         for v in rgdSamples_chaos_noise_signal_master:
             f.write("%s\n" % v)
         f.close()
 
-        f = open("Chaos_info_signal_slave_" + str(SNR[a]) + "_SNR.csv", "w")
+        f = open("Chaos_info_signal_slave_" + str(SNR[a]) + "_SNR.csv", "w") # From AD2-A
         for v in rgdSamples_chaos_info_signal_slave:
             f.write("%s\n" % v)
         f.close()
@@ -293,11 +295,12 @@ for a in range(len(SNR)):
         # Turn off synchronization circuit
         print("Turning the synchronization circuit OFF...")
         print("------------------------------")
-        dwf.FDwfAnalogIOEnableSet(hdwf_A, c_int(False))
+        # time.sleep(5)
+        # dwf.FDwfAnalogIOEnableSet(hdwf_A, c_int(False))
         dwf.FDwfAnalogOutConfigure(hdwf_A, channel, c_bool(False))
         dwf.FDwfAnalogOutConfigure(hdwf_B, channel, c_bool(False))
-        dwf.FDwfAnalogInChannelEnableSet(hdwf_A, c_int(0), c_bool(False))
-        dwf.FDwfAnalogInChannelEnableSet(hdwf_B, c_int(0), c_bool(False))
+        # dwf.FDwfAnalogInChannelEnableSet(hdwf_A, c_int(0), c_bool(False))
+        # dwf.FDwfAnalogInChannelEnableSet(hdwf_B, c_int(0), c_bool(False))
         print("Synchronization circuit is OFF.")
         print("------------------------------")
         time.sleep(5)  # Wait 5 sec.

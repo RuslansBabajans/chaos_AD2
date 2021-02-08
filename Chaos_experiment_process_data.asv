@@ -6,7 +6,7 @@ close all
 %% Read data acquired from AD2
 
 Fs=2e6;
-t_end=0.03;
+t_end=0.05;
 time_vector=0:1/Fs:t_end-1/Fs;
 
 snr_levels=[20 15 10 5 0]; % 20 15 10 5 0
@@ -54,14 +54,6 @@ end
 
 if snr_levels(m)==15
     figure(7)
-    plot(time_vector,Chaos_info_signal_slave)
-    hold on
-    plot(time_vector,Chaos_info_signal_slave)
-    plot(time_vector,Chaos_noise_signal_master)
-end
-
-if snr_levels(m)==20
-    figure(8)
     plot(time_vector,Chaos_info_signal_slave)
     hold on
     plot(time_vector,Chaos_info_signal_slave)
