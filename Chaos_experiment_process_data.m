@@ -5,7 +5,7 @@ close all
 %=============================%
 %% Read data acquired from AD2
 
-Fs=2e6;
+Fs=1e6;
 t_end=0.05;
 time_vector=0:1/Fs:t_end-1/Fs;
 
@@ -30,12 +30,12 @@ hold on
 end
 %% Format figure
 figure(1)
-xlabel('t, \mus')
+xlabel('t, s')
 grid on, grid minor
 % set(gca, 'XLim', [100, 300], 'XTick', 100:10:300,...
 %     'XTickLabel', 100:10:300);
 % set(gca, 'YLim', [0, 1], 'YTick', 0:0.05:1,...
 %     'YTickLabel', 0:0.05:1);
 set(gca, 'FontName', 'Times New Roman')
-set(gca,'fontsize',24)
+% set(gca,'fontsize',24)
 legend([ num2str(snr_levels(1)) ' dB'],[ num2str(snr_levels(2)) ' dB'],[ num2str(snr_levels(3)) ' dB'],[ num2str(snr_levels(4)) ' dB'],[ num2str(snr_levels(5)) ' dB'],'Location','best');
