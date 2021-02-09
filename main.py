@@ -54,7 +54,7 @@ cSamples_gen = 2 * 16384  # Number of samples for AWG
 
 # Acquisition variables
 fAcq = 2e6  # Sample frequency for analog input channels in Hz
-tAcq = 0.03  # Signal acquisition time in sec.
+tAcq = 1.50  # Signal acquisition time in sec.
 hzAcq = c_double(fAcq)
 nSamples = int(tAcq * fAcq)  # Number of samples for signal acquisition
 rgdSamples_chaos_info_signal_master = (c_double * nSamples)()  # Create a buffer array of c_doubles with size nSamples
@@ -202,8 +202,7 @@ for a in range(len(SNR)):
         # time.sleep(2)
         print("Starting oscilloscope acquisition...")
         print("------------------------------")
-        dwf.FDwfAnalogInConfigure(hdwf_A, c_int(0), c_int(1))
-        dwf.FDwfAnalogInConfigure(hdwf_B, c_int(0), c_int(1))
+
 
         fLost_A = 0
         fCorrupted_A = 0
@@ -213,6 +212,9 @@ for a in range(len(SNR)):
         fCorrupted_B = 0
         cSamples_B = 0
         cSamples_B=0
+
+        dwf.FDwfAnalogInConfigure(hdwf_A, c_int(0), c_int(1))
+        dwf.FDwfAnalogInConfigure(hdwf_B, c_int(0), c_int(1))
 
         while cSamples_A < nSamples and cSamples_B < nSamples:
 
@@ -252,8 +254,8 @@ for a in range(len(SNR)):
             if cSamples_A + cAvailable_A.value > nSamples:
                 cAvailable_A = c_int(nSamples - cSamples_A)
 
-                if cSamples_B + cAvailable_B.value > nSamples:
-                    cAvailable_B = c_int(nSamples - cSamples_B)
+            if cSamples_B + cAvailable_B.value > nSamples:
+                cAvailable_B = c_int(nSamples - cSamples_B)
 
             dwf.FDwfAnalogInStatusData(hdwf_A, c_int(0),
                                        byref(rgdSamples_chaos_info_signal_master, sizeof(c_double) * cSamples_A),
@@ -264,6 +266,7 @@ for a in range(len(SNR)):
             dwf.FDwfAnalogInStatusData(hdwf_B, c_int(0),
                                        byref(rgdSamples_chaos_noise_signal_master, sizeof(c_double) * cSamples_B),
                                        cAvailable_B)  # get AD2-B channel 1 data
+
             cSamples_A += cAvailable_A.value
             cSamples_B += cAvailable_B.value
 
@@ -296,7 +299,7 @@ for a in range(len(SNR)):
         print("Turning the synchronization circuit OFF...")
         print("------------------------------")
         # time.sleep(5)
-        # dwf.FDwfAnalogIOEnableSet(hdwf_A, c_int(False))
+        dwf.FDwfAnalogIOEnableSet(hdwf_A, c_int(False))
         dwf.FDwfAnalogOutConfigure(hdwf_A, channel, c_bool(False))
         dwf.FDwfAnalogOutConfigure(hdwf_B, channel, c_bool(False))
         # dwf.FDwfAnalogInChannelEnableSet(hdwf_A, c_int(0), c_bool(False))
