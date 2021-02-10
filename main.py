@@ -39,16 +39,17 @@ hdwf_A = c_int()  # AD2-A handler
 hdwf_B = c_int()  # AD2-B handler
 sts_A = c_byte()  # Variable for oscilloscope acquisition on AD2-A
 sts_B = c_byte()  # Variable for oscilloscope acquisition on AD2-B
-channel = c_int(0)  # Arbitrary waveform generator (AWG) Channel 1 (W1)
+W1 = c_int(0)  # Arbitrary waveform generator (AWG) Channel 1 (W1)
+W2 = c_int(1)  # Arbitrary waveform generator (AWG) Channel 2 (W2)
 device_id_A = c_int()  # The ID of a discovered AD2-A device
 device_id_B = c_int()  # The ID of a discovered AD2-B device
 cDevice = c_int()  # Stores the number of discovered AD2 devices
 
 # Declare string variables
 devicename = create_string_buffer(64)  # Character array to store the name of enumerated devices
-serialnum = create_string_buffer(16)  # Character array to store the serial of enumerated devices
+serialnum = create_string_buffer(16)  # Character array to store the serial number of enumerated devices
 
-# Custom waveform variables
+# Custom waveform generator variables
 hzFreq = 610.351563  # Parameter taken from the signal import window for the noise signals
 cSamples_gen = 2 * 16384  # Number of samples for AWG
 
@@ -150,13 +151,13 @@ for a in range(len(SNR)):
         #####################################################################################
         # Set up acquisition
         dwf.FDwfAnalogInChannelEnableSet(hdwf_A, c_int(0), c_bool(True))
-        dwf.FDwfAnalogInChannelRangeSet(hdwf_A, c_int(0), c_double(8))
+        dwf.FDwfAnalogInChannelRangeSet(hdwf_A, c_int(0), c_double(8)) # Set to 2 V for RC1
         dwf.FDwfAnalogInAcquisitionModeSet(hdwf_A, acqmodeRecord)
         dwf.FDwfAnalogInFrequencySet(hdwf_A, hzAcq)
         dwf.FDwfAnalogInRecordLengthSet(hdwf_A, c_double(tAcq))  # Set record length
 
         dwf.FDwfAnalogInChannelEnableSet(hdwf_B, c_int(0), c_bool(True))
-        dwf.FDwfAnalogInChannelRangeSet(hdwf_B, c_int(0), c_double(8))
+        dwf.FDwfAnalogInChannelRangeSet(hdwf_B, c_int(0), c_double(8)) # Set to 2 V for RC1
         dwf.FDwfAnalogInAcquisitionModeSet(hdwf_B, acqmodeRecord)
         dwf.FDwfAnalogInFrequencySet(hdwf_B, hzAcq)
         dwf.FDwfAnalogInRecordLengthSet(hdwf_B, c_double(tAcq))  # Set record length
@@ -164,25 +165,25 @@ for a in range(len(SNR)):
         # Generate info noise on AD2-A
         print("Generating info noise...")
         print("------------------------------")
-        dwf.FDwfAnalogOutNodeEnableSet(hdwf_A, channel, AnalogOutNodeCarrier, c_bool(True))
-        dwf.FDwfAnalogOutNodeFunctionSet(hdwf_A, channel, AnalogOutNodeCarrier, funcCustom)
-        dwf.FDwfAnalogOutNodeDataSet(hdwf_A, channel, AnalogOutNodeCarrier, genSamples_info_noise, c_int(cSamples_gen))
-        dwf.FDwfAnalogOutNodeFrequencySet(hdwf_A, channel, AnalogOutNodeCarrier, c_double(hzFreq))
-        dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, channel, AnalogOutNodeCarrier, c_double(Amplitude_info_noise[a]))
-        dwf.FDwfAnalogOutConfigure(hdwf_A, channel, c_bool(True))
+        dwf.FDwfAnalogOutNodeEnableSet(hdwf_A, W1, AnalogOutNodeCarrier, c_bool(True))
+        dwf.FDwfAnalogOutNodeFunctionSet(hdwf_A, W1, AnalogOutNodeCarrier, funcCustom)
+        dwf.FDwfAnalogOutNodeDataSet(hdwf_A, W1, AnalogOutNodeCarrier, genSamples_info_noise, c_int(cSamples_gen))
+        dwf.FDwfAnalogOutNodeFrequencySet(hdwf_A, W1, AnalogOutNodeCarrier, c_double(hzFreq))
+        dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W1, AnalogOutNodeCarrier, c_double(Amplitude_info_noise[a]))
+        dwf.FDwfAnalogOutConfigure(hdwf_A, W1, c_bool(True))
         print("Info noise generated and running.")
         print("------------------------------")
         #####################################################################################
         # Generate synchro noise on AD2-B
         print("Generating synchro noise...")
         print("------------------------------")
-        dwf.FDwfAnalogOutNodeEnableSet(hdwf_B, channel, AnalogOutNodeCarrier, c_bool(True))
-        dwf.FDwfAnalogOutNodeFunctionSet(hdwf_B, channel, AnalogOutNodeCarrier, funcCustom)
-        dwf.FDwfAnalogOutNodeDataSet(hdwf_B, channel, AnalogOutNodeCarrier, genSamples_synchro_noise,
+        dwf.FDwfAnalogOutNodeEnableSet(hdwf_B, W1, AnalogOutNodeCarrier, c_bool(True))
+        dwf.FDwfAnalogOutNodeFunctionSet(hdwf_B, W1, AnalogOutNodeCarrier, funcCustom)
+        dwf.FDwfAnalogOutNodeDataSet(hdwf_B, W1, AnalogOutNodeCarrier, genSamples_synchro_noise,
                                      c_int(cSamples_gen))
-        dwf.FDwfAnalogOutNodeFrequencySet(hdwf_B, channel, AnalogOutNodeCarrier, c_double(hzFreq))
-        dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_B, channel, AnalogOutNodeCarrier, c_double(Amplitude_synchro_noise[a]))
-        dwf.FDwfAnalogOutConfigure(hdwf_B, channel, c_bool(True))
+        dwf.FDwfAnalogOutNodeFrequencySet(hdwf_B, W1, AnalogOutNodeCarrier, c_double(hzFreq))
+        dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_B, W1, AnalogOutNodeCarrier, c_double(Amplitude_synchro_noise[a]))
+        dwf.FDwfAnalogOutConfigure(hdwf_B, W1, c_bool(True))
         print("Synchro noise generated and running.")
         print("------------------------------")
         #####################################################################################
@@ -203,7 +204,6 @@ for a in range(len(SNR)):
         print("Starting oscilloscope acquisition...")
         print("------------------------------")
 
-
         fLost_A = 0
         fCorrupted_A = 0
         cSamples_A = 0
@@ -211,10 +211,9 @@ for a in range(len(SNR)):
         fLost_B = 0
         fCorrupted_B = 0
         cSamples_B = 0
-        cSamples_B=0
 
-        dwf.FDwfAnalogInConfigure(hdwf_A, c_int(0), c_int(1))
         dwf.FDwfAnalogInConfigure(hdwf_B, c_int(0), c_int(1))
+        dwf.FDwfAnalogInConfigure(hdwf_A, c_int(0), c_int(1))
 
         while cSamples_A < nSamples and cSamples_B < nSamples:
 
@@ -300,10 +299,8 @@ for a in range(len(SNR)):
         print("------------------------------")
         # time.sleep(5)
         dwf.FDwfAnalogIOEnableSet(hdwf_A, c_int(False))
-        dwf.FDwfAnalogOutConfigure(hdwf_A, channel, c_bool(False))
-        dwf.FDwfAnalogOutConfigure(hdwf_B, channel, c_bool(False))
-        # dwf.FDwfAnalogInChannelEnableSet(hdwf_A, c_int(0), c_bool(False))
-        # dwf.FDwfAnalogInChannelEnableSet(hdwf_B, c_int(0), c_bool(False))
+        # dwf.FDwfAnalogOutConfigure(hdwf_A, W1, c_bool(False))
+        # dwf.FDwfAnalogOutConfigure(hdwf_B, W1, c_bool(False))
         print("Synchronization circuit is OFF.")
         print("------------------------------")
         time.sleep(5)  # Wait 5 sec.
