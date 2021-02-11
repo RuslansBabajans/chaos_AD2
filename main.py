@@ -54,7 +54,7 @@ hzFreq = 610.351563  # Parameter taken from the signal import window for the noi
 cSamples_gen = 2 * 16384  # Number of samples for AWG
 
 # Acquisition variables
-fAcq = 2e6  # Sample frequency for analog input channels in Hz
+fAcq = 1e6  # Sample frequency for analog input channels in Hz
 tAcq = 0.30  # Signal acquisition time in sec.        !!!!!!!!!!!! 3.00 !!!!!!!!!!!!
 hzAcq = c_double(fAcq)
 nSamples = int(tAcq * fAcq)  # Number of samples for signal acquisition

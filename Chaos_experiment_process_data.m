@@ -5,8 +5,8 @@ close all
 %=============================%
 %% Read data acquired from AD2
 
-Fs=2e6;
-t_end=0.30;
+Fs=1e6;
+t_end=0.3;
 time_vector=0:1/Fs:t_end-1/Fs;
 
 snr_levels=[20 15 10 5 0]; % 20 15 10 5 0
