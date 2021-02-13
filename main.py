@@ -12,8 +12,8 @@
 # 	2)Generate synchro noise on AD2-B;
 #	3)Turn on power voltage for synchro circuit (AD2-A);
 #	4)Recor and save samples:
-#		AD2-A - info signal_master, info noise (later to be summed in MATLAB);
-#		AD2-B - info signal_slave.
+#		AD2-A - info signal_master, info signal_slave;
+#		AD2-B - info noise (later to be summed in MATLAB)
 # Note - program connects to specific AD2 devices by using their serial numbers stored as variables.
 
 from dwfconstants import *
