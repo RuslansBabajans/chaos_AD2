@@ -22,27 +22,27 @@ Fs_scope=2e6;
 t_end=0.30;
 time_vector=0:1/Fs_scope:t_end-1/Fs_scope;
 
-snr_levels=[0]; % 20 15 10 5 0
+snr_levels=[20 15 10 5 0]; % 20 15 10 5 0
 
 for m=1:length(snr_levels)
 Chaos_info_signal_master = readmatrix(['Chaos_info_signal_master_',num2str(snr_levels(m)),'_SNR.csv']);
 Chaos_info_signal_slave = readmatrix(['Chaos_info_signal_slave_',num2str(snr_levels(m)),'_SNR.csv']);
 Chaos_noise_signal_master = readmatrix(['Chaos_noise_signal_master_',num2str(snr_levels(m)),'_SNR.csv']);
 
-figure(1)
+figure(m)
 plot(time_vector,Chaos_info_signal_master)
 hold on
 plot(time_generated,Generated_info_signal)
 
-figure(2)
-plot(time_vector,Chaos_info_signal_slave)
-hold on
-plot(time_generated,Generated_info_signal)
-
-figure(3)
-plot(time_vector,Chaos_noise_signal_master)
-hold on
-plot(time_generated,Generated_info_signal)
+% figure(2)
+% plot(time_vector,Chaos_info_signal_slave)
+% hold on
+% plot(time_generated,Generated_info_signal)
+% 
+% figure(3)
+% plot(time_vector,Chaos_noise_signal_master)
+% hold on
+% plot(time_generated,Generated_info_signal)
 
 end
 
