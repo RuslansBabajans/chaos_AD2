@@ -53,8 +53,10 @@ serialnum = create_string_buffer(16)  # Character array to store the serial numb
 hzFreq = 610.351563  # Parameter taken from the signal import window for the noise signals
 cSamples_gen = 2 * 16384  # Number of samples for AWG
 
+hzFreq_info = 106667/cSamples_gen #110e3/cSamples_gen  # Parameter taken from the signal import window for the info signals (3.356933593750000 Hz)
+
 # Acquisition variables
-fAcq = 1e6  # Sample frequency for analog input channels in Hz
+fAcq = 2e6  # Sample frequency for analog input channels in Hz
 tAcq = 0.30  # Signal acquisition time in sec. Aimed at 1000 bits with 300 us bit length
 hzAcq = c_double(fAcq)
 nSamples = int(tAcq * fAcq)  # Number of samples for signal acquisition
@@ -70,6 +72,14 @@ cCorrupted_A = c_int()
 cAvailable_B = c_int()
 cLost_B = c_int()
 cCorrupted_B = c_int()
+
+fLost_A = 0
+fCorrupted_A = 0
+cSamples_A = 0
+
+fLost_B = 0
+fCorrupted_B = 0
+cSamples_B = 0
 #####################################################################################
     # Import noise signal .csv files and convert them to c_double
 with open('RC1_synchro_noise_samples.csv', newline='') as File:
@@ -81,6 +91,11 @@ with open('RC1_info_noise_samples.csv', newline='') as File:
     txtlist = [j for sub in csv.reader(File) for j in sub]
     fa = list(map(float, txtlist))
     genSamples_info_noise = (c_double * len(fa))(*fa)
+
+with open('RC1_info_dignal_999_SNR_1.csv', newline='') as File:
+    txtlist = [j for sub in csv.reader(File) for j in sub]
+    fa = list(map(float, txtlist))
+    genSamples_info_signal = (c_double * len(fa))(*fa)
 #####################################################################################
 # Load dwf library (contain functions to interact with AD2)
 if sys.platform.startswith("win"):
@@ -170,6 +185,7 @@ for a in range(len(SNR)):
         dwf.FDwfAnalogOutNodeDataSet(hdwf_A, W1, AnalogOutNodeCarrier, genSamples_info_noise, c_int(cSamples_gen))
         dwf.FDwfAnalogOutNodeFrequencySet(hdwf_A, W1, AnalogOutNodeCarrier, c_double(hzFreq))
         dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W1, AnalogOutNodeCarrier, c_double(Amplitude_info_noise[a]))
+
         dwf.FDwfAnalogOutConfigure(hdwf_A, W1, c_bool(True))
         print("Info noise generated and running.")
         print("------------------------------")
@@ -198,22 +214,42 @@ for a in range(len(SNR)):
         print("Synchronization circuit is ON.")
         print("------------------------------")
         #####################################################################################
+        # Generate info SIGNAL on AD2-A
+        print("Running info signal...")
+        print("------------------------------")
+        # dwf.FDwfAnalogOutNodeEnableSet(hdwf_A, W2, AnalogOutNodeCarrier, c_bool(True))
+        dwf.FDwfAnalogOutNodeFunctionSet(hdwf_A, W2, AnalogOutNodeCarrier, funcCustom)
+        dwf.FDwfAnalogOutNodeDataSet(hdwf_A, W2, AnalogOutNodeCarrier, genSamples_info_signal,
+                                     c_int(cSamples_gen))
+        dwf.FDwfAnalogOutNodeFrequencySet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(hzFreq_info))
+        # FDwfAnalogOutNodeOffsetSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(0)
+        dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(5))
+        # dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(0))
+
+
+
+
+
+
+        dwf.FDwfAnalogOutNodeEnableSet(hdwf_A, W2, AnalogOutNodeCarrier, c_bool(True))
+        dwf.FDwfAnalogOutConfigure(hdwf_A, W2, c_bool(True))
+        #####################################################################################
         # Acquire scope data
         # wait at least 2 seconds for the offset to stabilize
         # time.sleep(2)
         print("Starting oscilloscope acquisition...")
         print("------------------------------")
 
-        fLost_A = 0
-        fCorrupted_A = 0
-        cSamples_A = 0
+        # fLost_A = 0
+        # fCorrupted_A = 0
+        # cSamples_A = 0
+        #
+        # fLost_B = 0
+        # fCorrupted_B = 0
+        # cSamples_B = 0
 
-        fLost_B = 0
-        fCorrupted_B = 0
-        cSamples_B = 0
-
-        dwf.FDwfAnalogInConfigure(hdwf_B, c_int(0), c_int(1))
         dwf.FDwfAnalogInConfigure(hdwf_A, c_int(0), c_int(1))
+        dwf.FDwfAnalogInConfigure(hdwf_B, c_int(0), c_int(1))
 
         while cSamples_A < nSamples and cSamples_B < nSamples:
 
@@ -293,12 +329,21 @@ for a in range(len(SNR)):
 
         print("Measurement results saved to .csv files.")
         print("------------------------------")
+
+        fLost_A = 0
+        fCorrupted_A = 0
+        cSamples_A = 0
+
+        fLost_B = 0
+        fCorrupted_B = 0
+        cSamples_B = 0
         #####################################################################################
         # Turn off synchronization circuit
         print("Turning the synchronization circuit OFF...")
         print("------------------------------")
         # time.sleep(5)
         dwf.FDwfAnalogIOEnableSet(hdwf_A, c_int(False))
+        dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(3))
         # dwf.FDwfAnalogOutConfigure(hdwf_A, W1, c_bool(False))
         # dwf.FDwfAnalogOutConfigure(hdwf_B, W1, c_bool(False))
         print("Synchronization circuit is OFF.")
