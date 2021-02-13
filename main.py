@@ -55,7 +55,7 @@ cSamples_gen = 2 * 16384  # Number of samples for AWG
 
 # Acquisition variables
 fAcq = 1e6  # Sample frequency for analog input channels in Hz
-tAcq = 0.30  # Signal acquisition time in sec.        !!!!!!!!!!!! 3.00 !!!!!!!!!!!!
+tAcq = 0.30  # Signal acquisition time in sec. Aimed at 1000 bits with 300 us bit length
 hzAcq = c_double(fAcq)
 nSamples = int(tAcq * fAcq)  # Number of samples for signal acquisition
 rgdSamples_chaos_info_signal_master = (c_double * nSamples)()  # Create a buffer array of c_doubles with size nSamples
