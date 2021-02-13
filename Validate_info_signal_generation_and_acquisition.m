@@ -13,21 +13,22 @@ Fs=round(1/tau);
 
 time_generated=t_delay:tau:T*n-tau+t_delay;
 
-Generated_info_signal = readmatrix('RC1_info_dignal_999_SNR_1.csv');
-Generated_info_signal=Generated_info_signal*5;
 %=============================%
 %% Generated info signal parameters
 
-Fs_scope=2e6;
-t_end=0.30;
+Fs_scope=1e6;
+t_end=0.3;
 time_vector=0:1/Fs_scope:t_end-1/Fs_scope;
 
 snr_levels=[20 15 10 5 0]; % 20 15 10 5 0
 
 for m=1:length(snr_levels)
-Chaos_info_signal_master = readmatrix(['Chaos_info_signal_master_',num2str(snr_levels(m)),'_SNR.csv']);
-Chaos_info_signal_slave = readmatrix(['Chaos_info_signal_slave_',num2str(snr_levels(m)),'_SNR.csv']);
-Chaos_noise_signal_master = readmatrix(['Chaos_noise_signal_master_',num2str(snr_levels(m)),'_SNR.csv']);
+Chaos_info_signal_master = readmatrix(['Chaos_info_signal_master_',num2str(snr_levels(m)),'_SNR_1.csv']);
+Chaos_info_signal_slave = readmatrix(['Chaos_info_signal_slave_',num2str(snr_levels(m)),'_SNR_1.csv']);
+Chaos_noise_signal_master = readmatrix(['Chaos_noise_signal_master_',num2str(snr_levels(m)),'_SNR_1.csv']);
+
+Generated_info_signal = readmatrix(['RC1_info_signal_',num2str(snr_levels(m)),'_SNR_1.csv']);
+Generated_info_signal=Generated_info_signal*5;
 
 figure(m)
 plot(time_vector,Chaos_info_signal_master)

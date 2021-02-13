@@ -56,8 +56,8 @@ cSamples_gen = 2 * 16384  # Number of samples for AWG
 hzFreq_info = 106667/cSamples_gen    # 110e3  # Parameter taken from the signal import window for the info signals (3.356933593750000 Hz)
 
 # Acquisition variables
-fAcq = 2e6  # Sample frequency for analog input channels in Hz
-tAcq = 0.30  # Signal acquisition time in sec. Aimed at 1000 bits with 300 us bit length
+fAcq = 1e6  # Sample frequency for analog input channels in Hz
+tAcq = 0.3  # Signal acquisition time in sec. Aimed at 1000 bits with 300 us bit length
 hzAcq = c_double(fAcq)
 nSamples = int(tAcq * fAcq)  # Number of samples for signal acquisition
 rgdSamples_chaos_info_signal_master = (c_double * nSamples)()  # Create a buffer array of c_doubles with size nSamples
@@ -92,10 +92,6 @@ with open('RC1_info_noise_samples.csv', newline='') as File:
     fa = list(map(float, txtlist))
     genSamples_info_noise = (c_double * len(fa))(*fa)
 
-with open('RC1_info_dignal_999_SNR_1.csv', newline='') as File:
-    txtlist = [j for sub in csv.reader(File) for j in sub]
-    fa = list(map(float, txtlist))
-    genSamples_info_signal = (c_double * len(fa))(*fa)
 #####################################################################################
 # Load dwf library (contain functions to interact with AD2)
 if sys.platform.startswith("win"):
@@ -163,16 +159,23 @@ for a in range(len(SNR)):
         print("======================================")
         print("ITERATION: " + str(a+1) + ", SNR= " + str(SNR[a]) + " dB")
         print("======================================")
+
+        #####################################################################################
+        # Read info signal file
+        with open("RC1_info_signal_" + str(SNR[a]) + "_SNR_1.csv", newline='') as File:
+            txtlist = [j for sub in csv.reader(File) for j in sub]
+            fa = list(map(float, txtlist))
+            genSamples_info_signal = (c_double * len(fa))(*fa)
         #####################################################################################
         # Set up acquisition
         dwf.FDwfAnalogInChannelEnableSet(hdwf_A, c_int(0), c_bool(True))
-        dwf.FDwfAnalogInChannelRangeSet(hdwf_A, c_int(0), c_double(8)) # Set to 2 V for RC1
+        dwf.FDwfAnalogInChannelRangeSet(hdwf_A, c_int(0), c_double(6)) # Set to 2 V for RC1
         dwf.FDwfAnalogInAcquisitionModeSet(hdwf_A, acqmodeRecord)
         dwf.FDwfAnalogInFrequencySet(hdwf_A, hzAcq)
         dwf.FDwfAnalogInRecordLengthSet(hdwf_A, c_double(tAcq))  # Set record length
 
         dwf.FDwfAnalogInChannelEnableSet(hdwf_B, c_int(0), c_bool(True))
-        dwf.FDwfAnalogInChannelRangeSet(hdwf_B, c_int(0), c_double(8)) # Set to 2 V for RC1
+        dwf.FDwfAnalogInChannelRangeSet(hdwf_B, c_int(0), c_double(6)) # Set to 2 V for RC1
         dwf.FDwfAnalogInAcquisitionModeSet(hdwf_B, acqmodeRecord)
         dwf.FDwfAnalogInFrequencySet(hdwf_B, hzAcq)
         dwf.FDwfAnalogInRecordLengthSet(hdwf_B, c_double(tAcq))  # Set record length
@@ -226,7 +229,7 @@ for a in range(len(SNR)):
         # FDwfAnalogOutNodeOffsetSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(0)
         dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(5))
         # dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(0))
-
+        time.sleep(1)
         dwf.FDwfAnalogOutConfigure(hdwf_A, W2, c_bool(True))
         #####################################################################################
         # Acquire scope data
@@ -299,17 +302,17 @@ for a in range(len(SNR)):
         print("Saving data to .csv files...")
         print("------------------------------")
 
-        f = open("Chaos_info_signal_master_" + str(SNR[a]) + "_SNR.csv", "w")  # From AD2-A
+        f = open("Chaos_info_signal_master_" + str(SNR[a]) + "_SNR_1.csv", "w")  # From AD2-A
         for v in rgdSamples_chaos_info_signal_master:
             f.write("%s\n" % v)
         f.close()
 
-        f = open("Chaos_noise_signal_master_" + str(SNR[a]) + "_SNR.csv", "w") # From AD2-B
+        f = open("Chaos_noise_signal_master_" + str(SNR[a]) + "_SNR_1.csv", "w") # From AD2-B
         for v in rgdSamples_chaos_noise_signal_master:
             f.write("%s\n" % v)
         f.close()
 
-        f = open("Chaos_info_signal_slave_" + str(SNR[a]) + "_SNR.csv", "w") # From AD2-A
+        f = open("Chaos_info_signal_slave_" + str(SNR[a]) + "_SNR_1.csv", "w") # From AD2-A
         for v in rgdSamples_chaos_info_signal_slave:
             f.write("%s\n" % v)
         f.close()
@@ -331,12 +334,12 @@ for a in range(len(SNR)):
         print("Turning the synchronization circuit OFF...")
         print("------------------------------")
         dwf.FDwfAnalogIOEnableSet(hdwf_A, c_int(False))
-        dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(3))
+        # dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(3))
         # dwf.FDwfAnalogOutConfigure(hdwf_A, W1, c_bool(False))
         # dwf.FDwfAnalogOutConfigure(hdwf_B, W1, c_bool(False))
         print("Synchronization circuit is OFF.")
         print("------------------------------")
-        time.sleep(5)  # Wait 5 sec.
+        time.sleep(4)  # Wait 5 sec.
 #####################################################################################
 # Close devices
 dwf.FDwfDeviceCloseAll()
