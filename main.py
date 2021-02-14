@@ -229,7 +229,7 @@ for a in range(len(SNR)):
         # FDwfAnalogOutNodeOffsetSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(0)
         dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(5))
         # dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(0))
-        time.sleep(1)
+        # time.sleep(1)
         dwf.FDwfAnalogOutConfigure(hdwf_A, W2, c_bool(True))
         #####################################################################################
         # Acquire scope data
@@ -339,7 +339,7 @@ for a in range(len(SNR)):
         # dwf.FDwfAnalogOutConfigure(hdwf_B, W1, c_bool(False))
         print("Synchronization circuit is OFF.")
         print("------------------------------")
-        time.sleep(4)  # Wait 5 sec.
+        time.sleep(5)  # Wait 5 sec.
 #####################################################################################
 # Close devices
 dwf.FDwfDeviceCloseAll()
