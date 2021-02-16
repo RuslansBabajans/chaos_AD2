@@ -234,7 +234,7 @@ for num in range(len(Experiment_number)):
             # FDwfAnalogOutNodeOffsetSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(0)
             dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(3.3))
             # dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(0))
-            time.sleep(0.1)
+            # time.sleep(0.1)
             dwf.FDwfAnalogOutConfigure(hdwf_A, W2, c_bool(True))
             #####################################################################################
             # Acquire scope data
