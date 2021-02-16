@@ -11,7 +11,7 @@
 #	1)Generate info noise on AD2-A;
 # 	2)Generate synchro noise on AD2-B;
 #	3)Turn on power voltage for synchro circuit (AD2-A);
-#	4)Recor and save samples:
+#	4)Record and save samples:
 #		AD2-A - info signal_master, info signal_slave;
 #		AD2-B - info noise (later to be summed in MATLAB)
 # Note - program connects to specific AD2 devices by using their serial numbers stored as variables.
@@ -25,12 +25,12 @@ import csv
 
 # Parameters of the experiment
 SNR = [20, 15, 10, 5, 0]  # Signal-2-noise ratios (SNR) for the experiment in dB
-# Amplitude_info_noise = [0.078, 0.150, 0.274, 0.493, 0.877]  # Amplitude of the noise signal for required SNR
-Amplitude_info_noise = [1.5, 2.5, 3.5, 4.5, 5.5]  # Amplitude of the noise signal for required SNR
-# Amplitude_synchro_noise = [0.000, 0.016, 0.050, 0.087, 0.180]  # Amplitude of the noise signal for required SNR
-Amplitude_synchro_noise = [5.000, 4.000, 3.000, 2.000, 1.000]  # Amplitude of the noise signal for required SNR
+Amplitude_info_noise = [0.078, 0.150, 0.274, 0.493, 0.877]  # Amplitude of the noise signal for required SNR
+# Amplitude_info_noise = [1.5, 2.5, 3.5, 4.5, 5.5]  # Amplitude of the noise signal for required SNR
+Amplitude_synchro_noise = [0.000, 0.016, 0.050, 0.087, 0.180]  # Amplitude of the noise signal for required SNR
+# Amplitude_synchro_noise = [5.000, 4.000, 3.000, 2.000, 1.000]  # Amplitude of the noise signal for required SNR
 
-max_experiment_number=3 # results in n-1 experiment Experiment_number     2    101
+max_experiment_number=2 # results in n-1 experiment Experiment_number     2    101
 Experiment_number = list(range(1, max_experiment_number))
 
 # Serial numbers of the used devices
@@ -218,6 +218,7 @@ for num in range(len(Experiment_number)):
             dwf.FDwfAnalogIOChannelNodeSet(hdwf_A, c_int(1), c_int(0), c_double(True))  # Enable negative supply
             dwf.FDwfAnalogIOChannelNodeSet(hdwf_A, c_int(1), c_int(1), c_double(-5.0))  # Set voltage to -5 V
             dwf.FDwfAnalogIOEnableSet(hdwf_A, c_int(True))  # Master enable
+            # time.sleep(0.1)
             print("Synchronization circuit is ON.")
             print("------------------------------")
             #####################################################################################
@@ -231,9 +232,9 @@ for num in range(len(Experiment_number)):
                                          c_int(cSamples_gen))
             dwf.FDwfAnalogOutNodeFrequencySet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(hzFreq_info))
             # FDwfAnalogOutNodeOffsetSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(0)
-            dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(5))
+            dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(3.3))
             # dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(0))
-            # time.sleep(1)
+            time.sleep(0.1)
             dwf.FDwfAnalogOutConfigure(hdwf_A, W2, c_bool(True))
             #####################################################################################
             # Acquire scope data

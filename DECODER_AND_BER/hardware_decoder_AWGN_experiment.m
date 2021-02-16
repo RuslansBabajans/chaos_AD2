@@ -36,13 +36,13 @@ Chaos_noise_signal_master = readmatrix(['Chaos_noise_signal_master_',num2str(snr
 %==============================================%
 %% Read original bit sequence
 
-original_bit_sequence=readmatrix(['Chaos_noise_signal_master_',num2str(snr_levels(m)),'_SNR_',num2str(number(num)),'.csv']);
+original_bit_sequence=readmatrix(['RC1_original_bit_sequence_',num2str(snr_levels(m)),'_SNR_',num2str(number(num)),'.csv']);
 
 %==============================================%
 %% Signals to calculate beta
 
 V_master_signal=Chaos_info_signal_master+Chaos_noise_signal_master; % Received info signal from Master with noise
-V_slave_signal=Chaos_info_signal_slave; % Slave local decode signal
+V_slave_signal=Chaos_info_signal_slave-mean(Chaos_info_signal_slave); % Slave local decode signal
 
 %==============================================%
 %% Create 100 us window
@@ -90,7 +90,7 @@ end
 %% Covert decoded signal to bit string
 
 bit_length=300e-6;
-number_of_received_bits=time(end)/bit_length;
+number_of_received_bits=round(time(end)/bit_length);
 
 % Predefine
 adress_holder=zeros(1,(round(number_of_received_bits)+1));
@@ -126,15 +126,15 @@ ber_ratio(m)=ber_number(m)/length(original_bit_sequence);
 %==============================================%
 %% Save BER numbers
 
-% fileID = fopen(['BER_numbers_SNR_',num2str(number(num)),'.txt'],'wt');
-% fprintf(fileID,'%11s\r\n',...
-% 'ber_numbers');
-% fprintf(fileID,'%11.8f\r\n',ber_number);
-
 fileID = fopen(['BER_numbers_SNR_',num2str(number(num)),'.txt'],'wt');
 fprintf(fileID,'%11s\r\n',...
 'ber_numbers');
-fprintf(fileID,'%u\r\n',ber_number);
+fprintf(fileID,'%11.8f\r\n',ber_number);
+
+% fileID = fopen(['BER_numbers_SNR_',num2str(number(num)),'.txt'],'wt');
+% fprintf(fileID,'%11s\r\n',...
+% 'ber_numbers');
+% fprintf(fileID,'%u\r\n',ber_number);
 
 end
 end
