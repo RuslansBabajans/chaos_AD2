@@ -6,8 +6,8 @@ close all
 %==============================================%
 %% Scope and loop parameters 
 
-Fs_scope=1e6;
-t_end=0.3;
+Fs_scope=2e6;
+t_end=0.03;
 time=0:1/Fs_scope:t_end-1/Fs_scope;
 
 snr_levels=[20 15 10 5 0];
@@ -33,6 +33,8 @@ Chaos_info_signal_master = readmatrix(['Chaos_info_signal_master_',num2str(snr_l
 Chaos_info_signal_slave = readmatrix(['Chaos_info_signal_slave_',num2str(snr_levels(m)),'_SNR_',num2str(number(num)),'.csv']);
 Chaos_noise_signal_master = readmatrix(['Chaos_noise_signal_master_',num2str(snr_levels(m)),'_SNR_',num2str(number(num)),'.csv']);
 
+figure()
+plot(time,Chaos_info_signal_slave)
 %==============================================%
 %% Read original bit sequence
 
@@ -42,7 +44,7 @@ original_bit_sequence=readmatrix(['RC1_original_bit_sequence_',num2str(snr_level
 %% Signals to calculate beta
 
 V_master_signal=Chaos_info_signal_master+Chaos_noise_signal_master; % Received info signal from Master with noise
-V_slave_signal=Chaos_info_signal_slave-mean(Chaos_info_signal_slave); % Slave local decode signal
+V_slave_signal=Chaos_info_signal_slave; % Slave local decode signal
 
 %==============================================%
 %% Create 100 us window

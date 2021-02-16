@@ -56,11 +56,11 @@ serialnum = create_string_buffer(16)  # Character array to store the serial numb
 hzFreq = 610.351563  # Parameter taken from the signal import window for the noise signals
 cSamples_gen = 2 * 16384  # Number of samples for AWG
 
-hzFreq_info = 106667/cSamples_gen    # 110e3  # Parameter taken from the signal import window for the info signals (3.356933593750000 Hz)
+hzFreq_info = 1093333/cSamples_gen    # 106667/cSamples_gen    # 110e3  # Parameter taken from the signal import window for the info signals (3.356933593750000 Hz)
 
 # Acquisition variables
-fAcq = 1e6  # Sample frequency for analog input channels in Hz
-tAcq = 0.3  # Signal acquisition time in sec. Aimed at 1000 bits with 300 us bit length
+fAcq = 2e6  # Sample frequency for analog input channels in Hz
+tAcq = 0.03  # Signal acquisition time in sec. Aimed at 1000 bits with 300 us bit length
 hzAcq = c_double(fAcq)
 nSamples = int(tAcq * fAcq)  # Number of samples for signal acquisition
 rgdSamples_chaos_info_signal_master = (c_double * nSamples)()  # Create a buffer array of c_doubles with size nSamples
@@ -183,18 +183,19 @@ for num in range(len(Experiment_number)):
             dwf.FDwfAnalogInAcquisitionModeSet(hdwf_B, acqmodeRecord)
             dwf.FDwfAnalogInFrequencySet(hdwf_B, hzAcq)
             dwf.FDwfAnalogInRecordLengthSet(hdwf_B, c_double(tAcq))  # Set record length
-            #####################################################################################
-            # Generate info noise on AD2-A
-            print("Generating info noise...")
-            print("------------------------------")
-            dwf.FDwfAnalogOutNodeEnableSet(hdwf_A, W1, AnalogOutNodeCarrier, c_bool(True))
-            dwf.FDwfAnalogOutNodeFunctionSet(hdwf_A, W1, AnalogOutNodeCarrier, funcCustom)
-            dwf.FDwfAnalogOutNodeDataSet(hdwf_A, W1, AnalogOutNodeCarrier, genSamples_info_noise, c_int(cSamples_gen))
-            dwf.FDwfAnalogOutNodeFrequencySet(hdwf_A, W1, AnalogOutNodeCarrier, c_double(hzFreq))
-            dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W1, AnalogOutNodeCarrier, c_double(Amplitude_info_noise[a]))
 
-            dwf.FDwfAnalogOutConfigure(hdwf_A, W1, c_bool(True))
-            print("Info noise generated and running.")
+
+            #####################################################################################
+            # Apply voltage to synchronization circuit by AD2-A
+            print("Turning the synchronization circuit ON...")
+            print("------------------------------")
+            dwf.FDwfAnalogIOChannelNodeSet(hdwf_A, c_int(0), c_int(0), c_double(True))  # Enable positive supply
+            dwf.FDwfAnalogIOChannelNodeSet(hdwf_A, c_int(0), c_int(1), c_double(5.0))  # Set voltage to 5 V
+            dwf.FDwfAnalogIOChannelNodeSet(hdwf_A, c_int(1), c_int(0), c_double(True))  # Enable negative supply
+            dwf.FDwfAnalogIOChannelNodeSet(hdwf_A, c_int(1), c_int(1), c_double(-5.0))  # Set voltage to -5 V
+            dwf.FDwfAnalogIOEnableSet(hdwf_A, c_int(True))  # Master enable
+            time.sleep(0.034)
+            print("Synchronization circuit is ON.")
             print("------------------------------")
             #####################################################################################
             # Generate synchro noise on AD2-B
@@ -210,16 +211,17 @@ for num in range(len(Experiment_number)):
             print("Synchro noise generated and running.")
             print("------------------------------")
             #####################################################################################
-            # Apply voltage to synchronization circuit by AD2-A
-            print("Turning the synchronization circuit ON...")
+            # Generate info noise on AD2-A
+            print("Generating info noise...")
             print("------------------------------")
-            dwf.FDwfAnalogIOChannelNodeSet(hdwf_A, c_int(0), c_int(0), c_double(True))  # Enable positive supply
-            dwf.FDwfAnalogIOChannelNodeSet(hdwf_A, c_int(0), c_int(1), c_double(5.0))  # Set voltage to 5 V
-            dwf.FDwfAnalogIOChannelNodeSet(hdwf_A, c_int(1), c_int(0), c_double(True))  # Enable negative supply
-            dwf.FDwfAnalogIOChannelNodeSet(hdwf_A, c_int(1), c_int(1), c_double(-5.0))  # Set voltage to -5 V
-            dwf.FDwfAnalogIOEnableSet(hdwf_A, c_int(True))  # Master enable
-            # time.sleep(0.1)
-            print("Synchronization circuit is ON.")
+            dwf.FDwfAnalogOutNodeEnableSet(hdwf_A, W1, AnalogOutNodeCarrier, c_bool(True))
+            dwf.FDwfAnalogOutNodeFunctionSet(hdwf_A, W1, AnalogOutNodeCarrier, funcCustom)
+            dwf.FDwfAnalogOutNodeDataSet(hdwf_A, W1, AnalogOutNodeCarrier, genSamples_info_noise, c_int(cSamples_gen))
+            dwf.FDwfAnalogOutNodeFrequencySet(hdwf_A, W1, AnalogOutNodeCarrier, c_double(hzFreq))
+            dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W1, AnalogOutNodeCarrier, c_double(Amplitude_info_noise[a]))
+
+            dwf.FDwfAnalogOutConfigure(hdwf_A, W1, c_bool(True))
+            print("Info noise generated and running.")
             print("------------------------------")
             #####################################################################################
             # Generate info SIGNAL on AD2-A
@@ -235,11 +237,12 @@ for num in range(len(Experiment_number)):
             dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(3.3))
             # dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf_A, W2, AnalogOutNodeCarrier, c_double(0))
             # time.sleep(0.1)
+
             dwf.FDwfAnalogOutConfigure(hdwf_A, W2, c_bool(True))
             #####################################################################################
             # Acquire scope data
             # wait at least 2 seconds for the offset to stabilize
-            # time.sleep(2)
+            # time.sleep(0.034)
             print("Starting oscilloscope acquisition...")
             print("------------------------------")
 

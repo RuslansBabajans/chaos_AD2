@@ -2,7 +2,7 @@
 close all, clear variables;
 format long;
 %=============================%
-n=1010; % number of bits 10000
+n=100; % number of bits 10000
 m=round(32768/n); % number of samples per bit 32320 32768
 t_delay=0; % delay bit stream
 T=300e-6; % bit length
